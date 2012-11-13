@@ -1,9 +1,30 @@
-import urllib
-import urllib2
+import sys
 import json
 from collections import defaultdict
 import time
 import random
+
+if sys.version_info < (3, 0):
+    from urllib2 import HTTPBasicAuthHandler
+    from urllib2 import build_opener
+    from urllib2 import ProxyHandler
+    from urllib2 import HTTPHandler
+    from urllib2 import install_opener
+    from urllib2 import Request
+    from urllib2 import urlopen
+    from urllib2 import HTTPError
+    from urllib import urlencode
+else:
+    from urllib.request import HTTPBasicAuthHandler
+    from urllib.request import build_opener
+    from urllib.request import ProxyHandler
+    from urllib.request import HTTPHandler
+    from urllib.request import install_opener
+    from urllib.request import Request
+    from urllib.request import urlopen
+    from urllib.error import HTTPError
+    from urllib.error import URLError
+    from urllib.parse import urlencode
 
 GCM_URL = 'https://android.googleapis.com/gcm/send'
 
@@ -66,9 +87,9 @@ class GCM(object):
                 protocol = url.split(':')[0]
                 proxy={protocol:proxy}
 
-            auth = urllib2.HTTPBasicAuthHandler()
-            opener = urllib2.build_opener(urllib2.ProxyHandler(proxy), auth, urllib2.HTTPHandler)
-            urllib2.install_opener(opener)
+            auth = HTTPBasicAuthHandler()
+            opener = build_opener(ProxyHandler(proxy), auth, HTTPHandler)
+            install_opener(opener)
 
 
     def construct_payload(self, registration_ids, data=None, collapse_key=None,
@@ -132,19 +153,19 @@ class GCM(object):
             headers['Content-Type'] = 'application/json'
 
         if not is_json:
-            data = urllib.urlencode(data)
-        req = urllib2.Request(self.url, data, headers)
+            data = urlencode(data)
+        req = Request(self.url, data, headers)
 
         try:
-            response = urllib2.urlopen(req).read()
-        except urllib2.HTTPError as e:
+            response = urlopen(req).read()
+        except HTTPError as e:
             if e.code == 400:
                 raise GCMMalformedJsonException("The request could not be parsed as JSON")
             elif e.code == 401:
                 raise GCMAuthenticationException("There was an error authenticating the sender account")
             elif e.code == 503:
                 raise GCMUnavailableException("GCM service is unavailable")
-        except urllib2.URLError as e:
+        except URLError as e:
             raise GCMConnectionException("There was an internal error in the GCM server while trying to process the request")
 
         if is_json:
