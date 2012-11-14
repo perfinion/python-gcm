@@ -114,8 +114,9 @@ class GCM(object):
                 payload['data'] = data
         else:
             payload = {'registration_id': registration_ids}
+
             if data:
-                for k in data.keys():
+                for k in sorted(data.keys()):
                     data['data.%s' % k] = data.pop(k)
                 payload.update(data)
 
