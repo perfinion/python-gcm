@@ -1,6 +1,7 @@
 import unittest
 from gcm import *
 import json
+import sys
 from mock import MagicMock
 import time
 
@@ -58,7 +59,12 @@ class GCMTest(unittest.TestCase):
             registration_ids=['1', '2'], data=self.data, collapse_key='foo',
             delay_while_idle=True, time_to_live=3600, is_json=True
         )
-        payload = json.loads(res)
+
+        if sys.version_info < (3, 0):
+            payload = json.loads(res)
+        else:
+            payload = json.loads(res.decode('utf8'))
+
         for arg in ['registration_ids', 'data', 'collapse_key', 'delay_while_idle', 'time_to_live']:
             self.assertIn(arg, payload)
 
@@ -69,7 +75,11 @@ class GCMTest(unittest.TestCase):
     def test_json_payload(self):
         reg_ids = ['12', '145', '56']
         json_payload = self.gcm.construct_payload(registration_ids=reg_ids, data=self.data)
-        payload = json.loads(json_payload)
+
+        if sys.version_info < (3, 0):
+            payload = json.loads(json_payload)
+        else:
+            payload = json.loads(json_payload.decode('utf8'))
 
         self.assertIn('registration_ids', payload)
         self.assertEqual(payload['data'], self.data)
