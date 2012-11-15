@@ -132,7 +132,7 @@ class GCM(object):
             payload['collapse_key'] = collapse_key
 
         if is_json:
-            payload = json.dumps(payload)
+            payload = json.dumps(payload).encode('utf8')
 
         return payload
 
@@ -170,7 +170,7 @@ class GCM(object):
             raise GCMConnectionException("There was an internal error in the GCM server while trying to process the request")
 
         if is_json:
-            response = json.loads(response)
+            response = json.loads(response.decode('utf8'))
         return response
 
     def raise_error(self, error):
