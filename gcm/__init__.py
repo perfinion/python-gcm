@@ -12,5 +12,4 @@ if sys.version_info < (3, 0):
     GCM = gcm.GCM
 else:
     import gcm
-
-    GCM = gcm.gcm.GCM
+    from gcm.gcm import GCM
